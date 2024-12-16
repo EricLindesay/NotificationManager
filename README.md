@@ -4,6 +4,11 @@ Notification Manager for Android using Kotlin
 
 
 ## Permissions Required
+
+Bind Notification Listener Service
+- https://developer.android.com/reference/android/service/notification/NotificationListenerService
+- https://developer.android.com/reference/android/service/notification/StatusBarNotification
+
 Special Permissions
 - Do Not Disturb access
 - Device and app noticiations
@@ -34,7 +39,7 @@ Don't need full-screen notifications, these are things like how phone calls and 
 
 - Create rules
     - A rule can have a start and end time and day of the week and for a specific (or multiple) apps
-    - An action associated with it (dismiss, mute, snooze, change the notif sound, replace, read out, change notification so it is like a call, auto tap button e.g. auto reply, open directly)
+    - An action associated with it (dismiss, mute, snooze, change the notif sound, replace, read out, haptic, change notification so it is full screen?, auto tap button e.g. auto reply, open directly)
     - Rules should be able to be very complex, there should be a button to extend. When you edit a rule it will look something like this
         - Rule: IF (app is WhatsAPP +modifier(and/or)) + and/or
             - Which then goes to IF (app is Whatsapp AND ...)
@@ -53,3 +58,4 @@ Don't need full-screen notifications, these are things like how phone calls and 
 - You can run all stored messages on the rule to see if it catches what you want.
 
 
+- GitHub has CI/CD and/or rigorous testing 
