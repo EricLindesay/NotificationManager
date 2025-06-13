@@ -12,6 +12,7 @@ import android.util.Base64
 import com.example.notificationmanager.MainActivity.Companion.NEW_NOTIF
 import com.example.notificationmanager.MainActivity.Companion.PACKAGE
 import com.example.notificationmanager.MainActivity.Companion.SETUP
+import com.example.notificationmanager.db.NotificationInfo
 import java.io.ByteArrayOutputStream
 
 class NotificationCatcher : NotificationListenerService() {
@@ -108,8 +109,6 @@ class NotificationCatcher : NotificationListenerService() {
             bitmap
         }
     }
-
-
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         println("Pre send 1")

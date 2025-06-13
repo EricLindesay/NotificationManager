@@ -8,25 +8,31 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.TextUtils
+import android.util.Log
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.notificationmanager.databinding.ActivityMainBinding
+import androidx.room.Room
+import com.example.notificationmanager.databinding.FigmaMainBinding
+import com.example.notificationmanager.db.AppDatabase
+import com.example.notificationmanager.db.NotificationDao
 import com.example.notificationmanager.db.NotificationInfo
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.example.notificationmanager.db.types
 
 
-class MainActivity : AppCompatActivity() {
+class FigmaMainActivity : AppCompatActivity() {
     private val ENABLED_NOTIFICATION_LISTENERS: String = "enabled_notification_listeners"
     private val ACTION_NOTIFICATION_LISTENER_SETTINGS: String =
         "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
@@ -35,31 +41,43 @@ class MainActivity : AppCompatActivity() {
         val NEW_NOTIF: String = ".new_notif"
         val SETUP: String = ".setup"
     }
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var binding: FigmaMainBinding
     private var imageChangeBroadcastReceiver: ImageChangeBroadcastReceiver? = null
     private var setupBroadcastReceiver: SetupBroadcastReceiver? = null
     private var textView: TextView? = null
 
     private var enableNotificationListenerAlertDialog: android.app.AlertDialog? = null
     private var customAdapter: CustomAdapter? = null
-    private var data: ArrayList<NotificationInfo?> = ArrayList()
-//    private var data: ArrayList<String?> = ArrayList()
+    private var newData: ArrayList<NotificationInfo?> = ArrayList()
+    private var silencedData: ArrayList<NotificationInfo?> = ArrayList()
+
+    private var notification = 10029
+    private lateinit var dao: NotificationDao
+
+    //    private var data: ArrayList<String?> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "database-name"
+        ).build()
+        dao = db.notificationDao()
+        newData = dao.getAllowed()
+        silencedData = dao.getSilent()
+
 //        val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
 //        val dataset = arrayOf("January", "February", "March")
-        customAdapter = CustomAdapter(data)
+        customAdapter = CustomAdapter(createAdapterData())
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = FigmaMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
 
         val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = customAdapter
-        customAdapter?.notifyItemInserted(0)
-
 
         if (!isNotificationServiceEnabled()) {
             enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog()
@@ -77,6 +95,7 @@ class MainActivity : AppCompatActivity() {
         intentFilter2.addAction(PACKAGE + SETUP)
         registerReceiver(setupBroadcastReceiver, intentFilter2, RECEIVER_EXPORTED)
 
+        /*
         val navView: BottomNavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
@@ -88,6 +107,8 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        */
+
         val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) {
@@ -99,12 +120,12 @@ class MainActivity : AppCompatActivity() {
         }
         requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
 
-        /*
         val leftButton: Button = findViewById(R.id.button2)
-        var builder = NotificationCompat.Builder(this, "10029")
+        var builder = NotificationCompat.Builder(this, "channelID")
             .setContentTitle("Test")
             .setSmallIcon(R.drawable.ic_home_black_24dp)
             .setContentText("Desc")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         createNotificationChannel()
 
@@ -112,12 +133,12 @@ class MainActivity : AppCompatActivity() {
             Log.d("Test", "CLicked")
             with(NotificationManagerCompat.from(this)) {
                 if (ActivityCompat.checkSelfPermission(
-                        this@MainActivity,
+                        this@FigmaMainActivity,
                         Manifest.permission.POST_NOTIFICATIONS
                     ) != PERMISSION_GRANTED
                 ) {
-                    // TODO: Consider calling
                     Log.d("Test", "No work")
+                    // TODO: Consider calling
 //                        ActivityCompat#requestPermissions
                     // here to request the missing permissions, and then overriding
 //                       public void onRequestPermissionsResult(int requestCode, String[] permissions,
@@ -126,22 +147,47 @@ class MainActivity : AppCompatActivity() {
                     // for ActivityCompat#requestPermissions for more details.
                     return@with
                 }
-                notify(10029, builder.build())
-                Log.d("Test", "notified")
+                notify(notification++, builder.build())
+                Log.d("Test", "notified "+notification)
             }
         }
-         */
+
+        val dataNav: ImageView = findViewById(R.id.data_button)
+        dataNav.setOnClickListener {
+            newData.clear()
+            silencedData.clear()
+            customAdapter!!.notifyDataSetChanged()
+            startActivity(Intent(this, FigmaDataActivity::class.java).apply {
+            })
+        }
+
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Test Name"
-            val descriptionText = "test Desc"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val channel = NotificationChannel("10029", name, importance)
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private fun createAdapterData(): ArrayList<NotificationInfo?> {
+        var data: ArrayList<NotificationInfo?> = ArrayList()
+        // Add the first separator
+        data.add(NotificationInfo(null,null,null,null,type=types.SEPARATOR_NEW))
+
+        // Add the new notifications
+        data.addAll(newData)
+
+        // Add the second
+        data.add(NotificationInfo(null,null,null,null,type=types.SEPARATOR_SILENT))
+
+        // Add the silenced notifications
+        data.addAll(silencedData)
+
+        return data
     }
 
     /**
@@ -160,44 +206,50 @@ class MainActivity : AppCompatActivity() {
 
     inner class SetupBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val receivedNotificationCode: ArrayList<NotificationInfo?>? = intent.getSerializableExtra("Notification Code") as? ArrayList<NotificationInfo?>
-            println("Received setup")
-            // Insert it into the database
-//            if (receivedNotificationCode == null) {
-//                return
-//            }
-//
-//            for (n: NotificationInfo? in receivedNotificationCode) {
-//                // Make sure we haven't already got this info
-//                if (!(n in data)) {
-//
-//                }
-//            }
-            // Read from the database and update the recycler
-            if (receivedNotificationCode != null) {
-                for (n: NotificationInfo? in receivedNotificationCode) {
-                    if (!(n in data)) {
-                        data.add(n)
-                        // Add the icon
-                        if (n!!.packageName != null) {
-                            println("Getting packagemanager")
-                            val packageManager = context.packageManager
+//            data.clear()
+            val receivedNotifications: ArrayList<NotificationInfo?>? = intent.getSerializableExtra("Notification Code") as? ArrayList<NotificationInfo?>
+            Log.d("Test", "Received setup")
+            if (receivedNotificationCode == null) {
+                return
+            }
+            val silencedSeparator: Int = newData.size+1  // +1 to account for the newData separator
+
+            // Add to the DB
+            // See if the new notification data is new data, if it is then check between 0 and silencedSeparator
+            // Otherwise if its silenced, check silenced
+            // Otherwise ignore
+
+//            data.add(NotificationInfo(null, null, null, null, type=types.SEPARATOR_NEW, icon=null))
+            for (n: NotificationInfo? in receivedNotifications) {
+                // Do some parsing to determine the rules and if its blocked or not
+
+                // See if it has already been parsed
+                if (!(n in data)) {
+                    data.add(n)
+                    // Add the icon
+                    if (n!!.packageName != null) {
+                        Log.d("Test", "Getting packagemanager")
+                        val packageManager = context.packageManager
 //                            val applicationInfo = packageManager.getApplicationIcon(n.packageName!!)
-                            println("Getting icon")
-                            val appIcon = packageManager.getApplicationIcon(n.packageName!!)
-                            println("setting icon")
-                            n.icon = appIcon
-                        }
+                        Log.d("Test", "Getting icon")
+                        val appIcon = packageManager.getApplicationIcon(n.packageName!!)
+                        Log.d("Test", "setting icon")
+                        n.icon = appIcon
+                        n.type = types.NEW
                     }
                 }
-                data = receivedNotificationCode
-                println(data)
-                println("Update adapter")
-                customAdapter?.notifyItemInserted(data.size-1)
-                println(receivedNotificationCode)
             }
-//                changeInterceptedNotificationImage(receivedNotificationCode)
+//            data.add(NotificationInfo(null,null,null,null,null, types.SEPARATOR_SILENT))
+//                data = receivedNotificationCode
+//                println(data)
+            println("Update adapter")
+//            customAdapter?
+            // Keep a pointer to the index with the separators, then add stuff in manually based on this and checking if it already exists, append to end of section by default
+
+//            customAdapter?.notifyItemInserted(data.size-1)
+//                println(receivedNotificationCode)
         }
+//                changeInterceptedNotificationImage(receivedNotificationCode)
     }
 
     private fun changeInterceptedNotificationImage(notificationCode: String) {

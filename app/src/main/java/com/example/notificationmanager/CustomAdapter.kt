@@ -13,9 +13,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.example.notificationmanager.db.NotificationInfo
+import com.example.notificationmanager.db.types
 
-class CustomAdapter(private val data: ArrayList<NotificationInfo?>) :
-    RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
+class CustomAdapter(private val data: ArrayList<NotificationInfo?>) : RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
+
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder)
@@ -25,6 +27,8 @@ class CustomAdapter(private val data: ArrayList<NotificationInfo?>) :
         val descTV: TextView
         val background: ConstraintLayout
         val icon: ImageView
+        val innerLayout: ConstraintLayout
+        val separator: TextView
 
         init {
             // Define click listener for the ViewHolder's View
@@ -32,6 +36,8 @@ class CustomAdapter(private val data: ArrayList<NotificationInfo?>) :
             descTV = view.findViewById(R.id.descTV)
             background = view.findViewById(R.id.frameLayout)
             icon = view.findViewById(R.id.imageView)
+            innerLayout = view.findViewById(R.id.innerLayout)
+            separator = view.findViewById(R.id.separator)
         }
     }
 
@@ -39,7 +45,7 @@ class CustomAdapter(private val data: ArrayList<NotificationInfo?>) :
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
         // Create a new view, which defines the UI of the list item
         val view = LayoutInflater.from(viewGroup.context)
-            .inflate(R.layout.text_row_item, viewGroup, false)
+            .inflate(R.layout.notification_row_item, viewGroup, false)
 
         return ViewHolder(view)
     }
@@ -61,6 +67,23 @@ class CustomAdapter(private val data: ArrayList<NotificationInfo?>) :
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
+        if (data[position]?.type == types.NEW) {
+            newNotification(viewHolder, position)
+        } else {
+            notificationSeparator(viewHolder, position)
+        }
+    }
+
+    fun notificationSeparator(viewHolder: ViewHolder, position: Int) {
+        viewHolder.innerLayout.visibility = View.GONE
+        viewHolder.separator.visibility = View.VISIBLE
+        if (data[position]?.type == types.SEPARATOR_NEW)
+            viewHolder.separator.text = "You have 2 new notifications"
+        else if (data[position]?.type == types.SEPARATOR_SILENT)
+            viewHolder.separator.text = "You have 0 silent notifications"
+    }
+
+    fun newNotification(viewHolder: ViewHolder, position: Int) {
         viewHolder.titleTV.text = data[position]?.title
         viewHolder.descTV.text = data[position]?.text
         viewHolder.icon.setImageDrawable(data[position]?.icon)
@@ -68,7 +91,7 @@ class CustomAdapter(private val data: ArrayList<NotificationInfo?>) :
 //            viewHolder.icon.setImageBitmap(base64ToBitmap(data[position]!!.encodedIcon!!))
 //        }
         if (data[position] != null && data[position]?.color != null) {
-            val background = viewHolder.background.background
+            val background = viewHolder.innerLayout.background
             if (background is GradientDrawable) {
                 background.setColor(data[position]!!.color!!)
 //                data[position]!!.color { background.setColor(it) }

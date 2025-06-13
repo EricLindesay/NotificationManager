@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".FigmaDataActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/purple_700">
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/right_guideline"
+            app:layout_constraintStart_toStartOf="@id/left_guideline"
+            app:layout_constraintTop_toBottomOf="@id/top_guideline"
+            android:paddingBottom="15dp">
+
+            <Button
+                android:id="@+id/activity_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:padding="0dp"
+                android:text="Activity"
+                android:textAllCaps="false"
+                android:textColor="@color/black"
+                android:backgroundTint="@color/blue_active"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/history_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                android:layout_weight="1"
+                android:text="History"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/purple_500"
+                android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/blocked_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:text="Blocked"
+                android:textAllCaps="false"
+                android:backgroundTint="@color/purple_500"
+                android:textColor="@color/white"
+                android:textSize="17sp" />
+        </LinearLayout>
+
+        <!--Ui component for our bar chart-->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/bar_chart"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            app:layout_constraintEnd_toStartOf="@+id/right_guideline"
+            app:layout_constraintHeight_max="200dp"
+            app:layout_constraintStart_toStartOf="@+id/left_guideline"
+            app:layout_constraintTop_toBottomOf="@+id/key_layout" />
+        <!--make height of ^ wrap content-->
+
+        <include
+            layout="@layout/figma_navigator"
+            android:id="@+id/bottom_navigator"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/top_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.05" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/left_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.08" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/right_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.92" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.33" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.67" />
+
+        <TextView
+            android:id="@+id/num_notifications"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="54 Notifications"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/right_guideline"
+            app:layout_constraintStart_toStartOf="@+id/left_guideline"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+        <TextView
+            android:id="@+id/day_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Today"
+            android:textColor="@color/blue_active"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="@+id/num_notifications"
+            app:layout_constraintStart_toStartOf="@+id/num_notifications"
+            app:layout_constraintTop_toBottomOf="@+id/num_notifications" />
+
+        <Spinner
+            android:id="@+id/filter_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_rect_item"
+            android:backgroundTint="@color/purple_500"
+            app:layout_constraintEnd_toEndOf="@+id/day_tv"
+            app:layout_constraintStart_toStartOf="@+id/day_tv"
+            app:layout_constraintTop_toBottomOf="@+id/day_tv"
+            android:layout_marginVertical="5dp"/>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintBottom_toTopOf="@id/bottom_navigator"
+            app:layout_constraintEnd_toEndOf="@id/right_guideline"
+            app:layout_constraintStart_toStartOf="@id/left_guideline"
+            app:layout_constraintTop_toBottomOf="@+id/num_layout" />
+
+
+        <LinearLayout
+            android:id="@+id/key_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/filter_spinner"
+            app:layout_constraintStart_toStartOf="@id/left_guideline"
+            app:layout_constraintEnd_toEndOf="@id/right_guideline"
+            android:gravity="center_horizontal"
+            android:paddingTop="5dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_gravity="center">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:ignore="MissingConstraints">
+
+                    <ImageView
+                        android:id="@+id/key_allowed_image"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintDimensionRatio="1:1"
+                        android:background="@drawable/rounded_rect_item"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/key_allowed_text"
+                        app:layout_constraintBottom_toBottomOf="@id/key_allowed_text"
+                        android:layout_marginEnd="5dp"
+                        android:minWidth="50dp"
+                        app:backgroundTint="@color/allowed" />
+
+                    <TextView
+                        android:id="@+id/key_allowed_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Allowed"
+                        android:textColor="@color/white"
+                        android:paddingStart="5dp"
+                        android:textSize="16sp"
+                        android:textAlignment="center"
+                        app:layout_constraintStart_toEndOf="@id/key_allowed_image"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_gravity="center">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:ignore="MissingConstraints">
+
+                    <ImageView
+                        android:id="@+id/key_silenced_image"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintDimensionRatio="1:1"
+                        android:background="@drawable/rounded_rect_item"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/key_silenced_text"
+                        app:layout_constraintBottom_toBottomOf="@id/key_silenced_text"
+                        android:layout_marginEnd="5dp"
+                        android:minWidth="50dp"
+                        app:backgroundTint="@color/silenced" />
+
+                    <TextView
+                        android:id="@+id/key_silenced_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Silenced"
+                        android:paddingStart="5dp"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textAlignment="center"
+                        app:layout_constraintStart_toEndOf="@id/key_silenced_image"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_gravity="center">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:ignore="MissingConstraints">
+
+                    <ImageView
+                        android:id="@+id/key_blocked_image"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        app:layout_constraintDimensionRatio="1:1"
+                        android:background="@drawable/rounded_rect_item"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/key_blocked_text"
+                        app:layout_constraintBottom_toBottomOf="@id/key_blocked_text"
+                        android:layout_marginEnd="5dp"
+                        android:minWidth="50dp"
+                        app:backgroundTint="@color/blocked" />
+
+                    <TextView
+                        android:id="@+id/key_blocked_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Blocked"
+                        android:paddingStart="5dp"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textAlignment="center"
+                        app:layout_constraintStart_toEndOf="@id/key_blocked_image"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/date_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sat, 14 Dec"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            app:layout_constraintTop_toBottomOf="@+id/bar_chart"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageView
+            android:id="@+id/left_chrevron"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:srcCompat="@drawable/chevron_left"
+            app:layout_constraintEnd_toStartOf="@id/date_text"
+            app:layout_constraintTop_toTopOf="@id/date_text"
+            app:layout_constraintBottom_toBottomOf="@id/date_text"
+            app:tint="@color/white"
+            android:paddingStart="50dp"/>
+
+        <ImageView
+            android:id="@+id/right_chrevron"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:srcCompat="@drawable/chevron_right"
+            app:layout_constraintStart_toEndOf="@id/date_text"
+            app:layout_constraintTop_toTopOf="@id/date_text"
+            app:layout_constraintBottom_toBottomOf="@id/date_text"
+            app:tint="@color/white"
+            android:paddingEnd="50dp" />
+
+        <LinearLayout
+            android:id="@+id/num_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/date_text"
+            app:layout_constraintStart_toStartOf="@id/left_guideline"
+            app:layout_constraintEnd_toEndOf="@id/right_guideline"
+            android:gravity="center_horizontal"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:id="@+id/num_allowed"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="%d Allowed"
+                android:textAlignment="center"
+                android:textColor="@color/allowed"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/bar_chart" />
+
+            <TextView
+                android:id="@+id/num_silenced"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="%d Silenced"
+                android:textColor="@color/silenced"
+                android:textSize="16sp"
+                android:textAlignment="center"
+                app:layout_constraintTop_toBottomOf="@+id/bar_chart"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/num_blocked"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="%d Blocked"
+                android:textColor="@color/blocked"
+                android:textSize="16sp"
+                android:textAlignment="center"
+                app:layout_constraintTop_toBottomOf="@+id/bar_chart"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
