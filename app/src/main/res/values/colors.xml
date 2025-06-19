@@ -11,6 +11,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green">#FF00FF00</color>
     <color name="red">#FFFF0000</color>
+    <color name="light_gray">#FFD3D3D3</color>
     <color name="allowed">@color/green</color>
     <color name="silenced">@color/blue_active</color>
     <color name="blocked">@color/red</color>

@@ -77,16 +77,16 @@ class CustomAdapter(private val data: ArrayList<NotificationInfo?>) : RecyclerVi
     fun notificationSeparator(viewHolder: ViewHolder, position: Int) {
         viewHolder.innerLayout.visibility = View.GONE
         viewHolder.separator.visibility = View.VISIBLE
-        if (data[position]?.type == types.SEPARATOR_NEW)
-            viewHolder.separator.text = "You have 2 new notifications"
-        else if (data[position]?.type == types.SEPARATOR_SILENT)
-            viewHolder.separator.text = "You have 0 silent notifications"
+//        if (data[position]?.type == types.SEPARATOR_NEW)
+//            viewHolder.separator.text = "You have 2 new notifications"
+//        else if (data[position]?.type == types.SEPARATOR_SILENT)
+//            viewHolder.separator.text = "You have 0 silent notifications"
     }
 
     fun newNotification(viewHolder: ViewHolder, position: Int) {
         viewHolder.titleTV.text = data[position]?.title
         viewHolder.descTV.text = data[position]?.text
-        viewHolder.icon.setImageDrawable(data[position]?.icon)
+//        viewHolder.icon.setImageDrawable(data[position]?.getIcon())
 //        if (data[position] != null && data[position]?.encodedIcon != null) {
 //            viewHolder.icon.setImageBitmap(base64ToBitmap(data[position]!!.encodedIcon!!))
 //        }
@@ -102,9 +102,9 @@ class CustomAdapter(private val data: ArrayList<NotificationInfo?>) : RecyclerVi
 
             // Calculate contrast of text and bg
             val contrast: Double = calculateContrastRatio(data[position]!!.color!!, colour)
-            if (contrast < 3) {
-                Log.e(MainActivity.PACKAGE, "Contrast is not high enough for guidelines")
-            }
+//            if (contrast < 3) {
+//                Log.e(MainActivity.PACKAGE, "Contrast is not high enough for guidelines")
+//            }
         }
 //        println("Got title and desc " + dataSet[position]?.title +" " +dataSet[position]?.text)
     }

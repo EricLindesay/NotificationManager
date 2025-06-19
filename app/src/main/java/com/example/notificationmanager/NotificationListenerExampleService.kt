@@ -27,7 +27,7 @@ class NotificationListenerExampleService : NotificationListenerService() {
 
 //        if(notificationCode != InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE){
 
-        println("Pre send 1")
+        println("Pre send 1, nles")
         val intent = Intent(MainActivity.PACKAGE)
         println(sbn.packageName)
         intent.putExtra("PackageName", sbn.packageName)

@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.notificationmanager.databinding.FigmaMainBinding
-import com.example.notificationmanager.db.AppDatabase
+//import com.example.notificationmanager.db.AppDatabase
 import com.example.notificationmanager.db.NotificationDao
 import com.example.notificationmanager.db.NotificationInfo
 import com.example.notificationmanager.db.types
@@ -47,7 +47,7 @@ class FigmaMainActivity : AppCompatActivity() {
     private var textView: TextView? = null
 
     private var enableNotificationListenerAlertDialog: android.app.AlertDialog? = null
-    private var customAdapter: CustomAdapter? = null
+//    private var customAdapter: CustomAdapter? = null
     private var newData: ArrayList<NotificationInfo?> = ArrayList()
     private var silencedData: ArrayList<NotificationInfo?> = ArrayList()
 
@@ -59,17 +59,17 @@ class FigmaMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "database-name"
-        ).build()
-        dao = db.notificationDao()
-        newData = dao.getAllowed()
-        silencedData = dao.getSilent()
+//        val db = Room.databaseBuilder(
+//            applicationContext,
+//            AppDatabase::class.java, "database-name"
+//        ).build()
+//        dao = db.notificationDao()
+//        newData = dao.getAllowed()
+//        silencedData = dao.getSilent()
 
 //        val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
 //        val dataset = arrayOf("January", "February", "March")
-        customAdapter = CustomAdapter(createAdapterData())
+//        customAdapter = CustomAdapter(createAdapterData())
 
         binding = FigmaMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -77,7 +77,7 @@ class FigmaMainActivity : AppCompatActivity() {
 
         val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = customAdapter
+//        recyclerView.adapter = customAdapter
 
         if (!isNotificationServiceEnabled()) {
             enableNotificationListenerAlertDialog = buildNotificationServiceAlertDialog()
@@ -156,9 +156,9 @@ class FigmaMainActivity : AppCompatActivity() {
         dataNav.setOnClickListener {
             newData.clear()
             silencedData.clear()
-            customAdapter!!.notifyDataSetChanged()
-            startActivity(Intent(this, FigmaDataActivity::class.java).apply {
-            })
+//            customAdapter!!.notifyDataSetChanged()
+//            startActivity(Intent(this, FigmaDataActivity::class.java).apply {
+//            })
         }
 
     }
@@ -176,13 +176,13 @@ class FigmaMainActivity : AppCompatActivity() {
     private fun createAdapterData(): ArrayList<NotificationInfo?> {
         var data: ArrayList<NotificationInfo?> = ArrayList()
         // Add the first separator
-        data.add(NotificationInfo(null,null,null,null,type=types.SEPARATOR_NEW))
+//        data.add(NotificationInfo(null,null,null,null,type=types.SEPARATOR_NEW))
 
         // Add the new notifications
         data.addAll(newData)
 
         // Add the second
-        data.add(NotificationInfo(null,null,null,null,type=types.SEPARATOR_SILENT))
+//        data.add(NotificationInfo(null,null,null,null,type=types.SEPARATOR_SILENT))
 
         // Add the silenced notifications
         data.addAll(silencedData)
@@ -209,7 +209,7 @@ class FigmaMainActivity : AppCompatActivity() {
 //            data.clear()
             val receivedNotifications: ArrayList<NotificationInfo?>? = intent.getSerializableExtra("Notification Code") as? ArrayList<NotificationInfo?>
             Log.d("Test", "Received setup")
-            if (receivedNotificationCode == null) {
+            if (receivedNotifications == null) {
                 return
             }
             val silencedSeparator: Int = newData.size+1  // +1 to account for the newData separator
@@ -220,25 +220,25 @@ class FigmaMainActivity : AppCompatActivity() {
             // Otherwise ignore
 
 //            data.add(NotificationInfo(null, null, null, null, type=types.SEPARATOR_NEW, icon=null))
-            for (n: NotificationInfo? in receivedNotifications) {
-                // Do some parsing to determine the rules and if its blocked or not
-
-                // See if it has already been parsed
-                if (!(n in data)) {
-                    data.add(n)
-                    // Add the icon
-                    if (n!!.packageName != null) {
-                        Log.d("Test", "Getting packagemanager")
-                        val packageManager = context.packageManager
-//                            val applicationInfo = packageManager.getApplicationIcon(n.packageName!!)
-                        Log.d("Test", "Getting icon")
-                        val appIcon = packageManager.getApplicationIcon(n.packageName!!)
-                        Log.d("Test", "setting icon")
-                        n.icon = appIcon
-                        n.type = types.NEW
-                    }
-                }
-            }
+//            for (n: NotificationInfo? in receivedNotifications) {
+//                // Do some parsing to determine the rules and if its blocked or not
+//
+//                // See if it has already been parsed
+//                if (!(n in data)) {
+//                    data.add(n)
+//                    // Add the icon
+//                    if (n!!.packageName != null) {
+//                        Log.d("Test", "Getting packagemanager")
+//                        val packageManager = context.packageManager
+////                            val applicationInfo = packageManager.getApplicationIcon(n.packageName!!)
+//                        Log.d("Test", "Getting icon")
+//                        val appIcon = packageManager.getApplicationIcon(n.packageName!!)
+//                        Log.d("Test", "setting icon")
+//                        n.icon = appIcon
+//                        n.type = types.NEW
+//                    }
+//                }
+//            }
 //            data.add(NotificationInfo(null,null,null,null,null, types.SEPARATOR_SILENT))
 //                data = receivedNotificationCode
 //                println(data)

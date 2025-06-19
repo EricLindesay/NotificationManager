@@ -9,66 +9,53 @@ import android.graphics.drawable.Drawable
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Base64
-import com.example.notificationmanager.MainActivity.Companion.NEW_NOTIF
-import com.example.notificationmanager.MainActivity.Companion.PACKAGE
-import com.example.notificationmanager.MainActivity.Companion.SETUP
+import android.util.Log
+import androidx.room.Room
+import com.example.notificationmanager.ComposeDataActivity.Companion.NEW_NOTIF
+import com.example.notificationmanager.ComposeDataActivity.Companion.PACKAGE
+import com.example.notificationmanager.ComposeDataActivity.Companion.SETUP
+import com.example.notificationmanager.db.AppDatabase
+import com.example.notificationmanager.db.DatabaseBuilder
+import com.example.notificationmanager.db.NotificationDao
+//import com.example.notificationmanager.MainActivity.Companion.NEW_NOTIF
+//import com.example.notificationmanager.MainActivity.Companion.PACKAGE
+//import com.example.notificationmanager.MainActivity.Companion.SETUP
 import com.example.notificationmanager.db.NotificationInfo
+import com.example.notificationmanager.db.types
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import java.io.ByteArrayOutputStream
 
 class NotificationCatcher : NotificationListenerService() {
+
+    lateinit var dao: NotificationDao
+
     override fun onListenerConnected() {
-        var ans: ArrayList<NotificationInfo> = ArrayList()
+        // Filter to remove duplicates
+        val db = DatabaseBuilder.getInstance(this)
+
+        dao = db.notificationDao()
+
+        Log.d("NotificationCatcher", "Catcher connected")
         for (n: StatusBarNotification in activeNotifications) {
-//            ans.add(n.packageName)
-            val title: String? = n.notification.extras.getString(Notification.EXTRA_TITLE)
-            val text: String? = n.notification.extras.getString(Notification.EXTRA_TEXT)
+            saveNotification(n)
+        }
+//        val intent = Intent(PACKAGE + SETUP)
+//        intent.putParcelableArrayListExtra("Notifications", ans)
+//        intent.putStringArrayListExtra("Notification Code", ans)
+//        intent.putExtra("Notification Code", ans)
+//        sendBroadcast(intent)
+
+        super.onListenerConnected()
+    }
 //            var icon: Icon? = n.notification.smallIcon
 //            if (icon == null) {
 //                icon = n.notification.getLargeIcon()
 //            } else {
 //                println(icon)
 //            }
-            val color: Int = n.notification.color
-
-//            val bitmap: Bitmap = (icon?.loadDrawable(this) as BitmapDrawable).bitmap
-//            val drawable: Drawable? = icon?.loadDrawable(this)
-//            val bitmap: String?
-//            if (drawable != null)
-//                bitmap = drawableToBase64(drawable)
-//            else
-//                bitmap = null
-
-            ans.add(NotificationInfo(n.packageName, title, text, color))
-            /*
-            if (n.packageName == "com.whatsapp") {
-                println("Notification " + n.packageName)
-                if (n.notification.actions != null) {
-                    for (action in n.notification.actions) {
-                        print("Action: ")
-                        for (key in action.extras.keySet()) {
-                            print(action.extras.keySet() + " ")
-                        }
-                        println()
-                        println("Title: "+action.title)
-                    }
-                }
-                for (key: String in n.notification.extras.keySet()) {
-                    println(key)
-                }
-                println(n.notification.extras.getString(Notification.EXTRA_TEXT))
-                println(n.notification.extras.getString(Notification.EXTRA_TITLE))
-                println(n.notification.extras.getString(Notification.EXTRA_SUB_TEXT))
-
-            }
-            println(n.packageName+ ": "+ n.notification.color)
-             */
-        }
-        val intent = Intent(PACKAGE + SETUP)
-//        intent.putStringArrayListExtra("Notification Code", ans)
-        intent.putExtra("Notification Code", ans)
-        sendBroadcast(intent)
-        super.onListenerConnected()
-    }
 
     fun drawableToBase64(drawable: Drawable): String {
         val bitmap = Bitmap.createBitmap(
@@ -111,30 +98,41 @@ class NotificationCatcher : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
-        println("Pre send 1")
-        val intent = Intent(PACKAGE+NEW_NOTIF)
-        intent.putExtra("Notification Code", sbn.key)
-        sendBroadcast(intent)
-        println("Sent success")
+        saveNotification(sbn)
+    }
+
+    fun saveNotification(sbn: StatusBarNotification) {
+//            ans.add(n.packageName)
+        val title: String = sbn.notification.extras.getString(Notification.EXTRA_TITLE) ?: ""
+        val text: String = sbn.notification.extras.getString(Notification.EXTRA_TEXT) ?: ""
+        val color: Int = sbn.notification.color
+
+        val notification = NotificationInfo(sbn.packageName, title, text, color)
+
+        // StatusBarNotification.Notification.Category is an interesting thign to consider
+
+        // Don't add completely blank notifications
+        if (title.isBlank() && text.isBlank()) {
+            return
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            Log.d("NotificationCatcher", "Adding notification: "+sbn.packageName)
+            dao.insertWithTimestamp(notification, sbn.postTime)
+            Log.d("NotificationCatcher", sbn.packageName+" added")
+        }
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
-//        int notificationCode = matchNotificationCode(sbn);
-
-//        if(notificationCode != InterceptedNotificationCode.OTHER_NOTIFICATIONS_CODE) {
-
-        val activeNotifications = this.activeNotifications
-
-        if (activeNotifications != null && activeNotifications.size > 0) {
-            for (i in activeNotifications.indices) {
-//                    if (notificationCode == matchNotificationCode(activeNotifications[i])) {
-                val intent = Intent(PACKAGE)
-                intent.putExtra("Notification Code", activeNotifications[i].notification)
-                sendBroadcast(intent)
-                break
-                //                    }
-//                }
-            }
+        // find it and set is read to true
+        // could use the id in the db, then if there is a duplicate then you need to edit the message somehow
+        // and to delete it, jsut find the id for the package
+        // the id isn't unqiue but it shouldn't be reused byt he package hopefully
+        // or find soething which wont be
+        CoroutineScope(Dispatchers.IO).launch {
+            Log.d("NotificationCatcher", "Setting notification as read: "+sbn.packageName)
+            dao.setAsRead(sbn.packageName, sbn.postTime)
+            Log.d("NotificationCatcher", sbn.packageName+" is read")
         }
     }
 

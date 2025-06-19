@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
                             println("Getting icon")
                             val appIcon = packageManager.getApplicationIcon(n.packageName!!)
                             println("setting icon")
-                            n.icon = appIcon
+//                            n.icon = appIcon
                         }
                     }
                 }
