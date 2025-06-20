@@ -29,6 +29,7 @@ class NotificationViewModel(application: Application) : AndroidViewModel(applica
     val silentNotificationsUnread: Flow<List<NotificationInfo>> = dao.getUnreadSilentFlow()
     val silentNotifications: Flow<List<NotificationInfo>> = dao.getSilentFlow()
     val packageTypeCounts: Flow<List<PackageTypeCount>> = dao.getPackageTypeCounts()
+    val blockedNotifications: Flow<List<NotificationInfo>> = dao.getBlockedFlow()
 
     val nonBlockedNotifications: Flow<List<NotificationInfo>> = dao.getNonBlockedFlow()
 

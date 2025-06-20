@@ -24,11 +24,19 @@
         <!--            android:theme="@style/Theme.NotificationManager" />-->
         <!--            android:name=".FigmaMainActivity"-->
         <activity
-            android:name=".ComposeDataActivity"
+            android:name=".DataActivity"
             android:exported="false"
             android:theme="@style/Theme.NotificationManager" />
         <activity
-            android:name=".ComposeHistoryActivity"
+            android:name=".HistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.NotificationManager" />
+        <activity
+            android:name=".BlockedActivity"
+            android:exported="false"
+            android:theme="@style/Theme.NotificationManager" />
+        <activity
+            android:name=".RulesActivity"
             android:exported="false"
             android:theme="@style/Theme.NotificationManager" />
         <activity

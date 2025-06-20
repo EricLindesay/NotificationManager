@@ -1,7 +1,6 @@
 package com.example.notificationmanager
 
 import android.app.Notification
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -10,22 +9,15 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Base64
 import android.util.Log
-import androidx.room.Room
-import com.example.notificationmanager.ComposeDataActivity.Companion.NEW_NOTIF
-import com.example.notificationmanager.ComposeDataActivity.Companion.PACKAGE
-import com.example.notificationmanager.ComposeDataActivity.Companion.SETUP
-import com.example.notificationmanager.db.AppDatabase
 import com.example.notificationmanager.db.DatabaseBuilder
 import com.example.notificationmanager.db.NotificationDao
 //import com.example.notificationmanager.MainActivity.Companion.NEW_NOTIF
 //import com.example.notificationmanager.MainActivity.Companion.PACKAGE
 //import com.example.notificationmanager.MainActivity.Companion.SETUP
 import com.example.notificationmanager.db.NotificationInfo
-import com.example.notificationmanager.db.types
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import java.io.ByteArrayOutputStream
 
 class NotificationCatcher : NotificationListenerService() {

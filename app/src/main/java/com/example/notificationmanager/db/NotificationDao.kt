@@ -36,6 +36,9 @@ interface NotificationDao {
     @Query("SELECT * FROM notificationinfo WHERE type == 'Blocked'")
     suspend fun getBlocked(): List<NotificationInfo>
 
+    @Query("SELECT * FROM notificationinfo WHERE type == 'Blocked' ORDER BY created_at DESC")
+    fun getBlockedFlow(): Flow<List<NotificationInfo>>
+
     @Query("SELECT COUNT(*) FROM notificationinfo WHERE type == 'NEW'")
     suspend fun getNumAllowed(): Int
 

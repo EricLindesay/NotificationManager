@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
@@ -35,7 +37,7 @@ import com.example.notificationmanager.db.types
 import com.example.notificationmanager.ui.compose.Utility
 import com.example.notificationmanager.ui.theme.MyApplicationTheme
 
-class ComposeHistoryActivity : ComponentActivity() {
+class HistoryActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,16 +46,20 @@ class ComposeHistoryActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                HistoryScreen(viewModel)
+                HistoryScreenIntermediate(viewModel)
             }
         }
     }
 }
 
 @Composable
-fun NotificationListAll(viewModel: NotificationViewModel, modifier: Modifier = Modifier) {
+fun HistoryScreenIntermediate(viewModel: NotificationViewModel) {
     val notifications by viewModel.nonBlockedNotifications.collectAsState(initial = emptyList())
+    NotificationListScreen(notifications, "History")
+}
 
+@Composable
+fun NotificationListAll(notifications: List<NotificationInfo>, modifier: Modifier = Modifier) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
@@ -109,10 +115,19 @@ fun HistoryNotificationCard(notification: NotificationInfo, modifier: Modifier =
                         .padding(end = 8.dp)
                 )
             }
-            Text(text=notification.title, color=Color(textColor))
+            Text(
+                text=notification.title,
+                color=Color(textColor),
+                modifier = Modifier.weight(1f)
+            )
 
             if (notification.type == types.SILENT) {
                 // Add a silenced icon
+                Icon(
+                    painter = painterResource(R.drawable.silence_icon),
+                    contentDescription = "",
+                    tint = Color(textColor),
+                )
             }
         }
 
@@ -125,7 +140,7 @@ fun HistoryNotificationCard(notification: NotificationInfo, modifier: Modifier =
 
 
 @Composable
-fun HistoryScreen(viewModel: NotificationViewModel) {
+fun NotificationListScreen(notifications: List<NotificationInfo>, activeScreen: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -139,8 +154,8 @@ fun HistoryScreen(viewModel: NotificationViewModel) {
                 .weight(1f)
         ) {
             Utility().PercentEmpty(0.05f)
-            Utility().DataNavigationButtons("History")
-            NotificationListAll(viewModel)
+            Utility().DataNavigationButtons(activeScreen)
+            NotificationListAll(notifications)
         }
         Utility().BottomBar("ComposeDataActivity")
     }

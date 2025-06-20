@@ -2,6 +2,8 @@ package com.example.notificationmanager.ui.compose
 
 import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -19,17 +21,21 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.notificationmanager.ComposeDataActivity
-import com.example.notificationmanager.ComposeHistoryActivity
+import com.example.notificationmanager.BlockedActivity
+import com.example.notificationmanager.DataActivity
+import com.example.notificationmanager.HistoryActivity
 import com.example.notificationmanager.ComposeMainActivity
 import com.example.notificationmanager.R
+import com.example.notificationmanager.spToDp
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -66,7 +72,7 @@ class Utility {
                     onClick = {
                         // Switch to data activity
                         if (currentScreen != "ComposeDataActivity") {
-                            context.startActivity(Intent(context, ComposeDataActivity::class.java))
+                            context.startActivity(Intent(context, DataActivity::class.java))
                         }
                     },
                     modifier = Modifier.weight(1f)
@@ -139,7 +145,7 @@ class Utility {
             Button(
                 onClick = {
                     if (activeScreen != "Activity") {
-                        context.startActivity(Intent(context, ComposeDataActivity::class.java))
+                        context.startActivity(Intent(context, DataActivity::class.java))
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor =  if (activeScreen == "Activity") activeColor else inactiveColor),
@@ -157,7 +163,7 @@ class Utility {
             Button(
                 onClick = {
                     if (activeScreen != "History") {
-                        context.startActivity(Intent(context, ComposeHistoryActivity::class.java))
+                        context.startActivity(Intent(context, HistoryActivity::class.java))
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = if (activeScreen == "History") activeColor else inactiveColor),
@@ -176,7 +182,7 @@ class Utility {
                 onClick = {
                     if (activeScreen != "Blocked") {
                         // Consider having authentication to continue
-                        context.startActivity(Intent(context, ComposeBlockedActivity::class.java))
+                        context.startActivity(Intent(context, BlockedActivity::class.java))
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = if (activeScreen == "Blocked") activeColor else inactiveColor),
@@ -194,4 +200,34 @@ class Utility {
         }
     }
 
+}
+
+@Composable
+inline fun Collapsable(
+    condition: MutableState<Boolean>,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = modifier
+            .clickable { condition.value = !condition.value }
+    ) {
+        Box(
+            modifier = Modifier.weight(1f)
+        ) {
+            content()
+        }
+
+        // set the down chevron or up depending on showActive.value
+        val iconResource = if (condition.value) R.drawable.chevron_up else R.drawable.chevron_down
+        Icon(
+            painter = painterResource(iconResource),
+            contentDescription = "",
+            tint = colorResource(R.color.white),
+            modifier = Modifier
+                .size(spToDp(24.sp))
+        )
+    }
 }
