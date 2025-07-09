@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
@@ -85,9 +86,8 @@ fun RuleTargetListBody(navController: NavController, ruleInfo: RuleInfo, modifie
     // Reactively observe state
     val isAllSelected by ruleInfo.hasTargetAll().collectAsState(initial = false)
     val selected by ruleInfo.getRuleTargetInfoPackages(context).collectAsState(initial = emptyList())
-    for (s in selected) {
-        Log.d("RuleTargetList", "Name: ${s.displayName}")
-    }
+
+    val selectedMap = remember { mutableStateMapOf<String, Boolean>() }
 
     // Cache app list (doesn't change, so no recomposition needed)
     val appTargetList = remember {
@@ -96,49 +96,69 @@ fun RuleTargetListBody(navController: NavController, ruleInfo: RuleInfo, modifie
 
     // Combine everything into final targets reactively
     val targets = remember(isAllSelected, selected, appTargetList) {
+        for (s in selected) {
+            selectedMap[s.packageName] = true
+        }
+        selectedMap["All Apps"] = isAllSelected
+
         getTargets(context, appTargetList, selected, isAllSelected)
     }
 
-//    val selectedMap = remember { mutableStateMapOf<String, Boolean>() }
-
-//    val targets: List<RuleTargetInfo> = getTargets(LocalContext.current)
-
-//    val context = LocalContext.current
-//    val stateFlow: StateFlow<List<RuleTargetInfo>> = ruleInfo.getRuleTargetInfos(context)
-//    val validTargets by stateFlow.collectAsState()
-
-//    val selected;
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
     ) {
         items(targets, key = { it.packageName }) { ruleTargetInfo ->
-            DisplayRuleTargetInfo(ruleTargetInfo)
+            val isSelected = selectedMap[ruleTargetInfo.packageName] ?: false
+            DisplayRuleTargetInfo(
+                ruleTargetInfo,
+                isSelected,
+                onCheckedChange = { newValue ->
+                    selectedMap[ruleTargetInfo.packageName] = newValue
+                    ruleTargetInfo.selected = !ruleTargetInfo.selected
+                })
             HorizontalDivider()
         }
     }
 }
 
 @Composable
-fun DisplayRuleTargetInfo(ruleTargetInfo: RuleTargetInfo) {
+//fun DisplayRuleTargetInfo(ruleTargetInfo: RuleTargetInfo) {
+fun DisplayRuleTargetInfo(ruleTargetInfo: RuleTargetInfo,
+                          isSelected: Boolean,
+                          onCheckedChange: (Boolean) -> Unit) {
     val checked: MutableState<Boolean> = remember { mutableStateOf(false) }
     checked.value = ruleTargetInfo.selected
+
+    val context = LocalContext.current
+    val packageManager = context.packageManager
+
+    val appInfo = remember(ruleTargetInfo.packageName) {
+        runCatching { packageManager.getApplicationInfo(ruleTargetInfo.packageName, 0) }.getOrNull()
+    }
+
+    val icon = remember(appInfo) {
+        appInfo?.let { packageManager.getApplicationIcon(it) }
+    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .padding(horizontal = 8.dp, vertical = 0.dp)
             .clickable {
-                checked.value = !checked.value
-                ruleTargetInfo.selected = !ruleTargetInfo.selected
+                onCheckedChange(!isSelected)
             }
     ) {
-        Image(
-            bitmap = drawableToBitmap(ruleTargetInfo.icon).asImageBitmap(),
-            contentDescription = "${ruleTargetInfo.displayName} App Icon",
-            modifier = Modifier
-                .size(24.dp)
-        )
+        if (icon != null) {
+            Image(
+                bitmap = drawableToBitmap(icon).asImageBitmap(),
+                contentDescription = "${ruleTargetInfo.displayName} App Icon",
+                modifier = Modifier
+                    .size(24.dp)
+            )
+        } else {
+            Spacer(modifier = Modifier.size(24.dp))
+        }
         Text(
             text = ruleTargetInfo.displayName,
             modifier = Modifier
@@ -146,12 +166,9 @@ fun DisplayRuleTargetInfo(ruleTargetInfo: RuleTargetInfo) {
                 .padding(horizontal = 4.dp)
         )
         Checkbox(
-            checked = checked.value,
+            checked = isSelected,
 //            checked = ruleTargetInfo.selected,
-            onCheckedChange = {
-                checked.value = !checked.value
-                ruleTargetInfo.selected = !ruleTargetInfo.selected
-            },
+            onCheckedChange = onCheckedChange
         )
     }
 }

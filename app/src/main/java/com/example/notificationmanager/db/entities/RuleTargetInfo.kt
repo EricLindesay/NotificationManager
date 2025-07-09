@@ -19,12 +19,13 @@ data class RuleTargetInfo(
                 val packageManager = context.packageManager
                 val app: ApplicationInfo =
                     packageManager.getApplicationInfo(packageName, 0)
-                _icon = packageManager.getApplicationIcon(app)
+//                _icon = packageManager.getApplicationIcon(app)
                 _displayName = app.loadLabel(packageManager).toString()
             }
             return _displayName!!
         }
 
+    /*
     var _icon: Drawable? = null
     val icon: Drawable
         get() {
@@ -36,7 +37,7 @@ data class RuleTargetInfo(
                 _displayName = app.loadLabel(packageManager).toString()
             }
             return _icon!!
-        }
+        }*/
 
     init {
         _displayName = display
@@ -47,7 +48,7 @@ data class RuleTargetInfo(
 //        } else {
 //            displayName = display
 //        }
-        _icon = drawable
+//        _icon = drawable
 //        if (drawable == null) {
 //            val app: ApplicationInfo =
 //                packageManager.getApplicationInfo(packageName, 0)

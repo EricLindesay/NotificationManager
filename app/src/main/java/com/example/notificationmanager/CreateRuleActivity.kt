@@ -165,6 +165,7 @@ fun CreateRuleScreenBody(navController: NavController, viewModel: EditRuleViewMo
             ShowCollapsable(targetTypes, "Targets", onClickAdd = {
                 // TODO: Do something about popping up maybe or saving state or something
                 navController.navigate("rules/edit/targets")
+                // Consider prefetching the display names for all packages using a launched effect
             })
             ShowCollapsable(conditionTypes, "Conditions", onClickAdd = {})
             ShowCollapsable(actionTypes, "Actions", onClickAdd = {})
