@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notificationmanager.db.DatabaseBuilder
-import com.example.notificationmanager.db.NotificationInfo
+import com.example.notificationmanager.db.entities.NotificationInfo
 import com.example.notificationmanager.db.PackageTypeCount
 import com.example.notificationmanager.ui.compose.Utility
 import kotlinx.coroutines.flow.Flow

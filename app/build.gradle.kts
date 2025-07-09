@@ -48,6 +48,9 @@ android {
         kotlinCompilerExtensionVersion = "1.5.13"
     }
 
+    configurations.all {
+        exclude(group = "androidx.navigation", module = "navigation-compose-jvmstubs")
+    }
 }
 
 dependencies {
@@ -65,6 +68,9 @@ dependencies {
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.androidx.foundation.android)
     implementation(libs.ads.mobile.sdk)
+    implementation(libs.androidx.navigation.compose.jvmstubs)   //
+    implementation(libs.androidx.navigation.compose.android)
+    implementation(libs.androidx.compose.navigation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -75,6 +81,7 @@ dependencies {
     // See Add the KSP plugin to your project
     ksp(libs.androidx.room.compiler)
 
+    implementation(libs.androidx.navigation.compose) // or latest
 
     val composeBom = platform("androidx.compose:compose-bom:2025.05.00")
     implementation(composeBom)

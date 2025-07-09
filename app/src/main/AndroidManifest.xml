@@ -17,30 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NotificationManager"
         tools:targetApi="31" >
-        <!--        <activity-->
-        <!--            android:name=".FigmaDataActivity"-->
-        <!--            android:name=".FigmaDataActivity"-->
-        <!--            android:exported="false"-->
-        <!--            android:theme="@style/Theme.NotificationManager" />-->
-        <!--            android:name=".FigmaMainActivity"-->
         <activity
-            android:name=".DataActivity"
-            android:exported="false"
-            android:theme="@style/Theme.NotificationManager" />
-        <activity
-            android:name=".HistoryActivity"
-            android:exported="false"
-            android:theme="@style/Theme.NotificationManager" />
-        <activity
-            android:name=".BlockedActivity"
-            android:exported="false"
-            android:theme="@style/Theme.NotificationManager" />
-        <activity
-            android:name=".RulesActivity"
-            android:exported="false"
-            android:theme="@style/Theme.NotificationManager" />
-        <activity
-            android:name=".ComposeMainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name" >
 

@@ -1,5 +1,6 @@
 package com.example.notificationmanager
 
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -56,9 +57,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getColor
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.notificationmanager.db.DBUtility
-import com.example.notificationmanager.db.NotificationInfo
+import com.example.notificationmanager.db.entities.NotificationInfo
 import com.example.notificationmanager.db.PackageTypeCount
+import com.example.notificationmanager.ui.compose.DataNavigationButtons
 import com.example.notificationmanager.ui.compose.Utility
 import com.example.notificationmanager.ui.theme.MyApplicationTheme
 import com.github.mikephil.charting.charts.BarChart
@@ -70,98 +74,6 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlin.random.Random
 
-class DataActivity : ComponentActivity() {
-    private val ENABLED_NOTIFICATION_LISTENERS: String = "enabled_notification_listeners"
-    private val ACTION_NOTIFICATION_LISTENER_SETTINGS: String =
-        "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
-    companion object {
-        val PACKAGE: String = "com.example.notificationmanager"
-        val NEW_NOTIF: String = ".new_notif"
-        val SETUP: String = ".setup"
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
-        val viewModel: NotificationViewModel = ViewModelProvider(this).get(NotificationViewModel::class.java)
-
-        setContent {
-            MyApplicationTheme {
-                Screen2(viewModel)
-            }
-        }
-//
-//        val setupBroadcastReceiver = SetupBroadcastReceiver()
-//        val intentFilter2 = IntentFilter()
-//        intentFilter2.addAction(PACKAGE + SETUP)
-//        registerReceiver(setupBroadcastReceiver, intentFilter2, RECEIVER_EXPORTED)
-//
-
-        if (!isNotificationServiceEnabled()) {
-            val enableNotificationListenerAlertDialog: android.app.AlertDialog? = buildNotificationServiceAlertDialog()
-            enableNotificationListenerAlertDialog!!.show()
-        }
-    }
-
-    /**
-     * Is Notification Service Enabled.
-     * Verifies if the notification listener service is enabled.
-     * Got it from: https://github.com/kpbird/NotificationListenerService-Example/blob/master/NLSExample/src/main/java/com/kpbird/nlsexample/NLService.java
-     * @return True if enabled, false otherwise.
-     */
-    private fun isNotificationServiceEnabled(): Boolean {
-        val pkgName = packageName
-        val flat = Settings.Secure.getString(
-            contentResolver,
-            ENABLED_NOTIFICATION_LISTENERS
-        )
-        if (!TextUtils.isEmpty(flat)) {
-            val names = flat.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            for (i in names.indices) {
-                val cn = ComponentName.unflattenFromString(names[i])
-                if (cn != null) {
-                    if (TextUtils.equals(pkgName, cn.packageName)) {
-                        return true
-                    }
-                }
-            }
-        }
-        return false
-    }
-
-    /**
-     * Build Notification Listener Alert Dialog.
-     * Builds the alert dialog that pops up if the user has not turned
-     * the Notification Listener Service on yet.
-     * @return An alert dialog which leads to the notification enabling screen
-     */
-    private fun buildNotificationServiceAlertDialog(): android.app.AlertDialog {
-        val alertDialogBuilder = android.app.AlertDialog.Builder(this)
-        alertDialogBuilder.setTitle(R.string.notification_listener_service)
-        alertDialogBuilder.setMessage(R.string.notification_listener_service_explanation)
-        alertDialogBuilder.setPositiveButton(
-            R.string.yes
-        ) { dialog, id -> startActivity(Intent(ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
-        alertDialogBuilder.setNegativeButton(
-            R.string.no
-        ) { dialog, id ->
-            // If you choose to not enable the notification listener
-            // the app. will not work as expected
-        }
-        return (alertDialogBuilder.create())
-    }
-
-    inner class SetupBroadcastReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val receivedNotifications: ArrayList<NotificationInfo?>? = intent.getSerializableExtra("Notification Code") as? ArrayList<NotificationInfo?>
-            Log.d("Test", "Received notifications")
-            if (receivedNotifications == null) {
-                return
-            }
-
-        }
-    }
-}
 
 @Composable
 fun BarChartComposable(data: List<List<Int>>, labels: List<String>, modifier: Modifier = Modifier) {
@@ -645,7 +557,13 @@ fun NotificationList(viewModel: NotificationViewModel, modifier: Modifier = Modi
 }
 
 @Composable
-fun Screen2(viewModel: NotificationViewModel) {
+fun DataScreen(navController: NavController) {
+    val applicationContext = LocalContext.current.applicationContext as Application
+
+    val viewModel: NotificationViewModel = viewModel(
+        factory = ApplicationViewModelFactory(applicationContext)
+    )
+
     val context = LocalContext.current
     val n1 = NotificationInfo("com.example.main", "Test", "This is the description text")
     ContextCompat.getDrawable(context, R.drawable.ic_home_black_24dp)?.let { n1.setIcon(it) }
@@ -656,7 +574,6 @@ fun Screen2(viewModel: NotificationViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(R.color.purple_700))
-//            .padding(16.dp, 0.dp, 16.dp, 0.dp)  // start, top, end, bottom
     ) {
         Column(
             modifier = Modifier
@@ -665,12 +582,11 @@ fun Screen2(viewModel: NotificationViewModel) {
                 .weight(1f)
         ) {
             Utility().PercentEmpty(0.05f)
-            Utility().DataNavigationButtons("Activity")
+            DataNavigationButtons(navController)
             ChartSection(viewModel)
             NotificationList(viewModel)
-//            NotificationList(listOf(n1,n1,n1,n1,n1,n1,n1,n1,n1,n1,n1,n1,n1,n1,n1,n1))
         }
-        Utility().BottomBar("ComposeDataActivity")
+//        Utility().BottomBar("ComposeDataActivity")
     }
 }
 

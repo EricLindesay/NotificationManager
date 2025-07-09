@@ -1,6 +1,7 @@
 package com.example.notificationmanager.ui.compose
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -18,22 +21,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.DataThresholding
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.notificationmanager.BlockedActivity
-import com.example.notificationmanager.DataActivity
-import com.example.notificationmanager.HistoryActivity
-import com.example.notificationmanager.ComposeMainActivity
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.wear.compose.navigation.currentBackStackEntryAsState
+import com.example.notificationmanager.MainActivity
 import com.example.notificationmanager.R
 import com.example.notificationmanager.spToDp
 import java.time.Instant
@@ -72,7 +81,7 @@ class Utility {
                     onClick = {
                         // Switch to data activity
                         if (currentScreen != "ComposeDataActivity") {
-                            context.startActivity(Intent(context, DataActivity::class.java))
+//                            context.startActivity(Intent(context, DataActivity::class.java))
                         }
                     },
                     modifier = Modifier.weight(1f)
@@ -88,8 +97,9 @@ class Utility {
                     onClick = {
                         // Switch to home/default activity
                         if (currentScreen != "ComposeMainActivity") {
-                            context.startActivity(Intent(context, ComposeMainActivity::class.java))
-                        }                    },
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        }
+                    },
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
@@ -101,7 +111,11 @@ class Utility {
                     )
                 }
                 IconButton(
-                    onClick = {},
+                    onClick = {
+                        if (currentScreen != "ComposeRulesActivity") {
+//                            context.startActivity(Intent(context, RulesActivity::class.java))
+                        }
+                    },
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(
@@ -130,80 +144,10 @@ class Utility {
             )
         }
     }
-
-    @Composable
-    fun DataNavigationButtons(activeScreen: String, modifier: Modifier = Modifier) {
-        val context = LocalContext.current
-
-        val activeColor = colorResource(R.color.blue_active)
-        val inactiveColor = colorResource(R.color.blue_inactive)
-        val activeTextColor = colorResource(R.color.black)
-        val inactiveTextColor = colorResource(R.color.white)
-        Row(
-            modifier=modifier
-        ) {
-            Button(
-                onClick = {
-                    if (activeScreen != "Activity") {
-                        context.startActivity(Intent(context, DataActivity::class.java))
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor =  if (activeScreen == "Activity") activeColor else inactiveColor),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(4.dp, 0.dp)
-            ) {
-                Text(
-                    text = "Activity",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    color = if (activeScreen == "Activity") activeTextColor else inactiveTextColor,
-                )
-            }
-            Button(
-                onClick = {
-                    if (activeScreen != "History") {
-                        context.startActivity(Intent(context, HistoryActivity::class.java))
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = if (activeScreen == "History") activeColor else inactiveColor),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(4.dp, 0.dp)
-            ) {
-                Text(
-                    "History",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (activeScreen == "History") activeTextColor else inactiveTextColor,
-                )
-            }
-            Button(
-                onClick = {
-                    if (activeScreen != "Blocked") {
-                        // Consider having authentication to continue
-                        context.startActivity(Intent(context, BlockedActivity::class.java))
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = if (activeScreen == "Blocked") activeColor else inactiveColor),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(4.dp, 0.dp)
-            ) {
-                Text(
-                    "Blocked",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (activeScreen == "Blocked") activeTextColor else inactiveTextColor,
-                )
-            }
-        }
-    }
-
 }
 
 @Composable
-inline fun Collapsable(
+fun Collapsable(
     condition: MutableState<Boolean>,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -229,5 +173,137 @@ inline fun Collapsable(
             modifier = Modifier
                 .size(spToDp(24.sp))
         )
+    }
+}
+
+data class TopLevelRoute<T : Any>(val name: String, val route: T, val icon: ImageVector)
+
+@Composable
+fun BottomNavBar(navController: NavController) {
+    val topLevelRoutes = listOf(
+        TopLevelRoute("Data", "data", Icons.Default.DataThresholding),
+        TopLevelRoute("Home", "main", Icons.Default.Home),
+        TopLevelRoute("Rules", "rules", Icons.Default.ContentPaste),
+    )
+    BottomNavigation {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+        topLevelRoutes.forEach { topLevelRoute ->
+            BottomNavigationItem(
+                icon = { Icon(topLevelRoute.icon, contentDescription = topLevelRoute.name) },
+                label = { Text(topLevelRoute.name) },
+                selected = currentDestination?.hierarchy?.any { it.hasRoute(topLevelRoute.route::class) } == true,
+                onClick = {
+                    navController.navigate(topLevelRoute.route) {
+                        // Pop up to the start destination of the graph to
+                        // avoid building up a large stack of destinations
+                        // on the back stack as users select items
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        // Avoid multiple copies of the same destination when
+                        // reselecting the same item
+                        launchSingleTop = true
+                        // Restore state when reselecting a previously selected item
+                        restoreState = true
+                    }
+                }
+            )
+        }
+    }
+}
+
+data class DataNavButton<T : Any>(val name: String, val route: T)
+
+@Composable
+fun DataNavigationButtons(navController: NavController, modifier: Modifier = Modifier) {
+    val activeColor = colorResource(R.color.blue_active)
+    val inactiveColor = colorResource(R.color.blue_inactive)
+    val activeTextColor = colorResource(R.color.black)
+    val inactiveTextColor = colorResource(R.color.white)
+
+    val buttonInfos = listOf(
+        DataNavButton("Activity", "data/info"),
+        DataNavButton("History", "data/history"),
+        DataNavButton("Blocked", "data/blocked"),
+    )
+
+    Row(
+        modifier=modifier
+    ) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+        if (currentDestination != null) {
+            Log.d("DataScreen", currentDestination.route!!)
+        }
+
+        buttonInfos.forEach { buttonInfo ->
+            Button(
+                onClick = {
+                    navController.navigate(buttonInfo.route) {
+                        // Pop up to the data activity parent
+                        // Try to find a way so the route is saved if you go onto the data screen
+                        navController.graph.findNode("data")?.let {
+                            popUpTo(it.id) {
+                                saveState = true
+                            }
+                        }
+                        // Avoid multiple copies of the same destination when
+                        // reselecting the same item
+                        launchSingleTop = true
+                        // Restore state when reselecting a previously selected item
+                        restoreState = true
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = if (currentDestination != null && currentDestination.route!! == buttonInfo.route) activeColor else inactiveColor),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp, 0.dp)
+            ) {
+                Text(
+                    text = buttonInfo.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    color = if (currentDestination != null && currentDestination.route!! == buttonInfo.route) activeTextColor else inactiveTextColor,
+                )
+            }
+        }
+//        Button(
+//            onClick = {
+//                if (activeScreen != "History") {
+//                    context.startActivity(Intent(context, HistoryActivity::class.java))
+//                }
+//            },
+//            colors = ButtonDefaults.buttonColors(containerColor = if (activeScreen == "History") activeColor else inactiveColor),
+//            modifier = Modifier
+//                .weight(1f)
+//                .padding(4.dp, 0.dp)
+//        ) {
+//            Text(
+//                "History",
+//                fontSize = 17.sp,
+//                fontWeight = FontWeight.Bold,
+//                color = if (activeScreen == "History") activeTextColor else inactiveTextColor,
+//            )
+//        }
+//        Button(
+//            onClick = {
+//                if (activeScreen != "Blocked") {
+//                    // Consider having authentication to continue
+//                    context.startActivity(Intent(context, BlockedActivity::class.java))
+//                }
+//            },
+//            colors = ButtonDefaults.buttonColors(containerColor = if (activeScreen == "Blocked") activeColor else inactiveColor),
+//            modifier = Modifier
+//                .weight(1f)
+//                .padding(4.dp, 0.dp)
+//        ) {
+//            Text(
+//                "Blocked",
+//                fontSize = 17.sp,
+//                fontWeight = FontWeight.Bold,
+//                color = if (activeScreen == "Blocked") activeTextColor else inactiveTextColor,
+//            )
+//        }
     }
 }

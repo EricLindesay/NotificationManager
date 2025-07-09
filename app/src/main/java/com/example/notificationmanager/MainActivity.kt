@@ -1,5 +1,6 @@
 package com.example.notificationmanager
 
+import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -38,26 +40,37 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
-import com.example.notificationmanager.db.NotificationInfo
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
+import com.example.notificationmanager.db.DatabaseBuilder
+import com.example.notificationmanager.db.entities.NotificationInfo
+import com.example.notificationmanager.ui.compose.BottomNavBar
 import com.example.notificationmanager.ui.compose.Collapsable
 import com.example.notificationmanager.ui.compose.Utility
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
-        val viewModel: NotificationViewModel = ViewModelProvider(this).get(NotificationViewModel::class.java)
 
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val db = DatabaseBuilder.getInstance(application.applicationContext)
+//            db.ruleDao().insertDummyRuleWithTargets()
+//            db.ruleDao().insertAdCapTarget()
+        }
+//
         setContent {
             MyApplicationTheme {
-                Screen(viewModel)
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                }
+                App()
             }
         }
     }
@@ -173,9 +186,13 @@ fun drawableToBitmap(drawable: Drawable): Bitmap {
 }
 
 @Composable
-fun Screen(viewModel: NotificationViewModel, modifier: Modifier = Modifier) {
-//    var active: ArrayList<String> = arrayListOf("a", "b");
-//    var silent: ArrayList<String> = arrayListOf("c", "d");
+fun MainScreen(navController: NavController, modifier: Modifier = Modifier) {
+    val applicationContext = LocalContext.current.applicationContext as Application
+
+    val viewModel: NotificationViewModel = viewModel(
+        factory = ApplicationViewModelFactory(applicationContext)
+    )
+
     Column (
         modifier=modifier
             .fillMaxSize()
@@ -183,7 +200,7 @@ fun Screen(viewModel: NotificationViewModel, modifier: Modifier = Modifier) {
     ) {
         Utility().PercentEmpty(0.1f)
         NotificationRecycler(viewModel, Modifier.weight(1f))
-        Utility().BottomBar("ComposeMainActivity")
+//        Utility().BottomBar("ComposeMainActivity")
     }
 }
 
@@ -217,5 +234,62 @@ fun CardPreview() {
     MyApplicationTheme {
 //        Screen(viewModel)
 //        NotificationCard(info)
+    }
+}
+
+@Composable
+fun getEditViewModelForRule(id: Long): EditRuleViewModel {
+    val applicationContext = LocalContext.current.applicationContext as Application
+
+    val viewModel: RuleViewModel = viewModel(
+        factory = ApplicationViewModelFactory(applicationContext)
+    )
+
+    val editRuleViewModel: EditRuleViewModel = viewModel(
+        factory = ApplicationViewModelFactory(applicationContext)
+    )
+
+    val ruleInfo = viewModel.getRuleInfo(id=id).collectAsState(initial=null)
+    editRuleViewModel.setRuleState(ruleInfo)
+    return editRuleViewModel
+}
+
+@Composable
+fun App() {
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(navController)
+                    },
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "main",
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable("main") { MainScreen(navController) }
+
+            navigation(startDestination = "data/info", route = "data") {
+                composable("data/info") { DataScreen(navController) }
+                composable("data/history") { HistoryScreen(navController) }
+                composable("data/blocked") { BlockedScreen(navController) }
+            }
+
+            navigation(startDestination = "rules/list", route = "rules") {
+                composable("rules/list") {
+                    RulesScreen(navController)
+                }
+                composable("rules/edit") {
+                    val editRuleViewModel = getEditViewModelForRule(id=2)
+                    CreateRuleScreen(navController, editRuleViewModel)
+                }
+                composable("rules/edit/targets") {
+                    val editRuleViewModel = getEditViewModelForRule(id=2)
+                    RuleTargetListScreen(navController, editRuleViewModel)
+                }
+            }
+        }
     }
 }

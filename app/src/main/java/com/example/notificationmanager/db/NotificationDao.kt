@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.example.notificationmanager.db.entities.NotificationInfo
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.yield
 
 @Dao
 interface NotificationDao {

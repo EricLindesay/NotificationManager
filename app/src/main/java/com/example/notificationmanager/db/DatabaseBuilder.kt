@@ -18,9 +18,9 @@ object DatabaseBuilder {
     private fun buildRoomDB(context: Context) : AppDatabase {
         val db = Room.databaseBuilder(
             context.applicationContext,
-            AppDatabase::class.java, "app-database13"
-        ).build()
-
+            AppDatabase::class.java, "app-database15"
+        )
+            .build()
         return db
     }
 

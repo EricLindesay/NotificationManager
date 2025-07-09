@@ -1,5 +1,6 @@
 package com.example.notificationmanager
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,30 +33,25 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
-import com.example.notificationmanager.db.NotificationInfo
-import com.example.notificationmanager.db.types
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.notificationmanager.db.entities.NotificationInfo
+import com.example.notificationmanager.db.entities.types
+import com.example.notificationmanager.ui.compose.DataNavigationButtons
 import com.example.notificationmanager.ui.compose.Utility
 import com.example.notificationmanager.ui.theme.MyApplicationTheme
 
-class HistoryActivity : ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
-        val viewModel: NotificationViewModel = ViewModelProvider(this).get(NotificationViewModel::class.java)
-
-        setContent {
-            MyApplicationTheme {
-                HistoryScreenIntermediate(viewModel)
-            }
-        }
-    }
-}
 
 @Composable
-fun HistoryScreenIntermediate(viewModel: NotificationViewModel) {
+fun HistoryScreen(navController: NavController) {
+    val applicationContext = LocalContext.current.applicationContext as Application
+
+    val viewModel: NotificationViewModel = viewModel(
+        factory = ApplicationViewModelFactory(applicationContext)
+    )
+
     val notifications by viewModel.nonBlockedNotifications.collectAsState(initial = emptyList())
-    NotificationListScreen(notifications, "History")
+    NotificationListScreen(navController, notifications)
 }
 
 @Composable
@@ -140,7 +136,7 @@ fun HistoryNotificationCard(notification: NotificationInfo, modifier: Modifier =
 
 
 @Composable
-fun NotificationListScreen(notifications: List<NotificationInfo>, activeScreen: String) {
+fun NotificationListScreen(navController: NavController, notifications: List<NotificationInfo>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -154,10 +150,11 @@ fun NotificationListScreen(notifications: List<NotificationInfo>, activeScreen: 
                 .weight(1f)
         ) {
             Utility().PercentEmpty(0.05f)
-            Utility().DataNavigationButtons(activeScreen)
+            DataNavigationButtons(navController)
+//            Utility().DataNavigationButtons(activeScreen)
             NotificationListAll(notifications)
         }
-        Utility().BottomBar("ComposeDataActivity")
+//        Utility().BottomBar("ComposeDataActivity")
     }
 
 }

@@ -1,4 +1,4 @@
-package com.example.notificationmanager.db
+package com.example.notificationmanager.db.entities
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
@@ -11,19 +11,18 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
-import androidx.room.TypeConverters
 import java.io.Serializable
 
 @Entity
 data class NotificationInfo(
     @ColumnInfo(name="package_name") val packageName: String,
-    @ColumnInfo(name="title") val title: String,
-    @ColumnInfo(name="text") val text: String,
+    val title: String,
+    val text: String,
 
-    @ColumnInfo(name="color") val color: Int = Color.WHITE,
+    val color: Int = Color.WHITE,
     @ColumnInfo(name="is_read") val isRead: Boolean = false,
-    @ColumnInfo(name="type") var type: types = types.NEW,
-    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
+    var type: types = types.NEW,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo(name="created_at") var createdAt: Long? = null
 )
     : Serializable {

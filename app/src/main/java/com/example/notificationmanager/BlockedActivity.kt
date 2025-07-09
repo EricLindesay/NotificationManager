@@ -1,32 +1,27 @@
 package com.example.notificationmanager
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.notificationmanager.ui.theme.MyApplicationTheme
 
-class BlockedActivity : ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
-        val viewModel: NotificationViewModel =
-            ViewModelProvider(this).get(NotificationViewModel::class.java)
-
-        setContent {
-            MyApplicationTheme {
-                BlockedScreenIntermediate(viewModel)
-            }
-        }
-    }
-}
 
 @Composable
-fun BlockedScreenIntermediate(viewModel: NotificationViewModel) {
+fun BlockedScreen(navController: NavController) {
+    val applicationContext = LocalContext.current.applicationContext as Application
+
+    val viewModel: NotificationViewModel = viewModel(
+        factory = ApplicationViewModelFactory(applicationContext)
+    )
+
     val notifications by viewModel.blockedNotifications.collectAsState(initial = emptyList())
-    NotificationListScreen(notifications, "Blocked")
+    NotificationListScreen(navController, notifications)
 }

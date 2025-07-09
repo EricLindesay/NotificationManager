@@ -14,7 +14,7 @@ import com.example.notificationmanager.db.NotificationDao
 //import com.example.notificationmanager.MainActivity.Companion.NEW_NOTIF
 //import com.example.notificationmanager.MainActivity.Companion.PACKAGE
 //import com.example.notificationmanager.MainActivity.Companion.SETUP
-import com.example.notificationmanager.db.NotificationInfo
+import com.example.notificationmanager.db.entities.NotificationInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
